@@ -1,0 +1,24 @@
+[
+  {
+    "model": "app.kolekcja",
+    "pk": 1,
+    "fields": {
+      "nazwa_kolekcji": "Kolekcja Domowa",
+      "data_posadzenia": "2026-01-01",
+      "status": "Zdrowa",
+      "temperatura": 22.5
+    }
+  },
+  {
+    "model": "app.roslina",
+    "pk": 1,
+    "fields": {
+      "gatunek": "Monstera Deliciosa",
+      "nazwa_powszechna": "Monstera dziurawa",
+      "opis": "Piękna roślina domowa",
+      "okres_kwitnienia": "Brak",
+      "id_kolekcji": 1,
+      "id_rodzaju": null
+    }
+  }
+]

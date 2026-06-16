@@ -1,0 +1,47 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <h3>Dodaj nowy rodzaj</h3>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Dodaj rodzaj</button>
+        </form>
+    </div>
+
+    <div class="col-md-8">
+        <h3>Lista rodzajow</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Warunki hodowli</th>
+                    <th>Akcja</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rodzaje %}
+                <tr>
+                    <td>{{ r.rodzaj }}</td>
+                    <td>
+                        {% if r.id_warunku %}
+                        Wilgotnosc: {{ r.id_warunku.wilgotnosc }},
+                        Naslonecznienie: {{ r.id_warunku.naslonecznienie }}
+                        {% else %}
+                        Brak warunkow
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'usun_rodzaj' r.id_rodzaju %}" class="btn btn-danger btn-sm">Usun</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

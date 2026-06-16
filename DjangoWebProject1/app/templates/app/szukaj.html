@@ -1,0 +1,101 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+<h2>{{ title }}</h2>
+<p class="text-muted">Wpisz nazwę rośliny, aby uzyskać sugerowane warunki hodowli i poprawić wydajność zbiorów.</p>
+
+<form method="get" action="{% url 'szukaj_rosliny' %}" class="mb-4">
+    <div class="input-group">
+        <input type="text"
+               name="q"
+               class="form-control form-control-lg"
+               placeholder="Np. Rosa canina, Pomidor, Marchew..."
+               value="{{ query }}">
+        <div class="input-group-append">
+            <button class="btn btn-success btn-lg" type="submit">
+                <span class="glyphicon glyphicon-search"></span> Szukaj
+            </button>
+        </div>
+    </div>
+</form>
+
+{% if query and not wyniki %}
+    <div class="alert alert-warning">
+        Nie znaleziono rośliny „<strong>{{ query }}</strong>".
+        <a href="{% url 'moje_rosliny' %}">Dodaj ją do bazy</a>.
+    </div>
+{% endif %}
+
+{% for w in wyniki %}
+<div class="panel panel-success">
+    <div class="panel-heading">
+        <h3 class="panel-title">
+            <strong>{{ w.roslina.nazwa_powszechna|default:w.roslina.gatunek }}</strong>
+            {% if w.roslina.nazwa_powszechna %}
+                <small class="text-muted"> — <em>{{ w.roslina.gatunek }}</em></small>
+            {% endif %}
+        </h3>
+    </div>
+    <div class="panel-body">
+
+        {% if w.roslina.opis %}
+        <p>{{ w.roslina.opis }}</p>
+        {% endif %}
+
+        <div class="row">
+
+            <!-- Warunki hodowli -->
+            <div class="col-md-4">
+                <h4><span class="glyphicon glyphicon-leaf"></span> Warunki hodowli</h4>
+                {% if w.warunki %}
+                <table class="table table-condensed">
+                    <tr><td><strong>Wilgotność</strong></td><td>{{ w.warunki.wilgotnosc }}</td></tr>
+                    <tr><td><strong>Nasłonecznienie</strong></td><td>{{ w.warunki.naslonecznienie }}</td></tr>
+                    <tr><td><strong>Temp. min.</strong></td><td>{{ w.warunki.temp_min }} °C</td></tr>
+                    <tr><td><strong>Temp. maks.</strong></td><td>{{ w.warunki.temp_maks }} °C</td></tr>
+                    {% if w.roslina.okres_kwitnienia %}
+                    <tr><td><strong>Okres kwitnienia</strong></td><td>{{ w.roslina.okres_kwitnienia }}</td></tr>
+                    {% endif %}
+                </table>
+                {% else %}
+                <p class="text-muted">Brak przypisanych warunków hodowli.</p>
+                {% endif %}
+            </div>
+
+            <!-- Gleba -->
+            <div class="col-md-4">
+                <h4><span class="glyphicon glyphicon-grain"></span> Zalecana gleba</h4>
+                {% if w.gleba %}
+                <table class="table table-condensed">
+                    <tr><td><strong>Nazwa</strong></td><td>{{ w.gleba.nazwa }}</td></tr>
+                    <tr><td><strong>Typ</strong></td><td>{{ w.gleba.typ }}</td></tr>
+                    <tr><td><strong>pH</strong></td><td>{{ w.gleba.ph_gleby }}</td></tr>
+                </table>
+                {% else %}
+                <p class="text-muted">Brak informacji o glebie.</p>
+                {% endif %}
+            </div>
+
+            <!-- Nawozy -->
+            <div class="col-md-4">
+                <h4><span class="glyphicon glyphicon-tint"></span> Zalecane nawozy</h4>
+                {% if w.nawozy %}
+                <ul class="list-group">
+                    {% for nawoz in w.nawozy %}
+                    <li class="list-group-item">
+                        <strong>{{ nawoz.producent }}</strong><br>
+                        <small>N: {{ nawoz.zawartosc_azotu }} | P: {{ nawoz.zawartosc_fosforu }}</small>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Brak przypisanych nawozów.</p>
+                {% endif %}
+            </div>
+
+        </div><!-- /.row -->
+    </div><!-- /.panel-body -->
+</div><!-- /.panel -->
+{% endfor %}
+
+{% endblock %}

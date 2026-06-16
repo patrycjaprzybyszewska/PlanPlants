@@ -1,0 +1,159 @@
+{% extends "app/layout.html" %}
+
+{% block content %}
+
+{% if alerty_allelopatii %}
+<div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; border-radius: 5px; margin-top: 20px; margin-bottom: 20px;">
+    <h3 style="margin-top: 0; font-weight: bold;"> ALERT: Konflikty roslin (Allelopatia ujemna)!</h3>
+    <ul style="margin-bottom: 0;">
+        {% for alert in alerty_allelopatii %}
+        <li>
+            W kolekcji <strong>{{ alert.0 }}</strong> wykryto niebezpieczne sasiedztwo:
+            <strong>{{ alert.1 }}</strong> oraz <strong>{{ alert.2 }}</strong> wplywaja na siebie negatywnie!
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+{% if alerty_warunkow %}
+<div style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; padding: 15px; border-radius: 5px; margin-top: 10px; margin-bottom: 20px;">
+    <h3 style="margin-top: 0; font-weight: bold;"> ALERT: Zle warunki hodowli!</h3>
+    <ul style="margin-bottom: 0;">
+        {% for alert in alerty_warunkow %}
+        <li>
+            W kolekcji <strong>{{ alert.0 }}</strong> roslina <strong>{{ alert.1 }}</strong> ma zle warunki!
+            Temperatura kolekcji wynosi <strong>{{ alert.2 }}C</strong>, a roslina wymaga miedzy <strong>{{ alert.3 }}C</strong> a <strong>{{ alert.4 }}C</strong>.
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+<div class="jumbotron">
+    <h1>Witaj w systemie zarzadzania roslinami</h1>
+</div>
+
+<div class="row" style="margin-bottom: 50px;">
+    <div class="col-md-6 col-md-offset-3 text-center">
+        <h2>Statystyki roslin wedlug gatunkow</h2>
+        <canvas id="roslinyChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('roslinyChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: {{ gatunki|safe }},
+            datasets: [{
+                data: {{ ilosci|safe }},
+                backgroundColor: ['#5bc0de', '#f0ad4e', '#5cb85c', '#d9534f', '#777']
+            }]
+        }
+    });
+</script>
+
+<div class="row" style="margin-bottom: 20px;">
+    <div class="col-md-6">
+        <h2>Status pielegnacji i parametry kolekcji</h2>
+    </div>
+    <div class="col-md-6 text-right" style="margin-top: 20px;">
+        <span style="margin-right: 10px; font-weight: bold;">Zmien widok:</span>
+        <a href="?widok=tabela" class="btn {% if aktualny_widok == 'tabela' %}btn-primary{% else %}btn-default{% endif %}">Tradycyjna tabela</a>
+        <a href="?widok=kafelki" class="btn {% if aktualny_widok == 'kafelki' %}btn-primary{% else %}btn-default{% endif %}">Nowoczesne kafelki</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+
+        {% if aktualny_widok == 'tabela' %}
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Nazwa kolekcji</th>
+                    <th>Status kwitnienia</th>
+                    <th>Status temperatury</th>
+                    <th>Suma roslin</th>
+                    <th>Wymagana gleba</th>
+                    <th>Wymagany nawoz</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for col in statusy %}
+                <tr>
+                    <td><strong>{{ col.0 }}</strong></td>
+                    <td>{{ col.1 }}</td>
+                    <td>
+                        <span class="{% if 'ALERT' in col.2 %}text-danger font-weight-bold{% else %}text-success{% endif %}">
+                            {{ col.2 }}
+                        </span>
+                    </td>
+                    <td><span class="badge badge-info" style="font-size: 14px;">{{ col.3 }} szt.</span></td>
+                    <td>
+                        {% if col.4 %}
+                        <span class="label label-warning" style="font-size: 11px;">{{ col.4 }}</span>
+                        {% else %}
+                        <span class="text-muted">Brak danych</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if col.5 %}
+                        <span class="label label-success" style="font-size: 11px;">{{ col.5 }}</span>
+                        {% else %}
+                        <span class="text-muted">Brak nawozu</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">Brak dostepnych danych</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+        <div class="row">
+            {% for col in statusy %}
+            <div class="col-md-4" style="margin-bottom: 20px;">
+                <div class="panel panel-default" style="border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                    <div class="panel-heading" style="background-color: #f5f5f5; font-size: 16px; font-weight: bold;">
+                        {{ col.0 }}
+                    </div>
+                    <div class="panel-body">
+                        <p><strong>Kwitnienie:</strong> {{ col.1 }}</p>
+                        <p>
+                            <strong>Temperatura:</strong>
+                            <span class="{% if 'ALERT' in col.2 %}text-danger font-weight-bold{% else %}text-success{% endif %}">
+                                {{ col.2 }}
+                            </span>
+                        </p>
+                        <p>
+                            <strong>Gleba:</strong>
+                            {% if col.4 %}<span class="text-warning">{{ col.4 }}</span>{% else %}Brak danych{% endif %}
+                        </p>
+                        <p>
+                            <strong>Nawoz:</strong>
+                            {% if col.5 %}<span class="text-success">{{ col.5 }}</span>{% else %}Brak danych{% endif %}
+                        </p>
+                        <hr style="margin-top: 10px; margin-bottom: 10px;">
+                        <p style="margin-bottom: 0;">
+                            <strong>Zasoby:</strong> <span class="label label-info" style="font-size: 12px;">{{ col.3 }} roslin</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-md-12 text-center">
+                <p class="well">Brak dostepnych danych</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
