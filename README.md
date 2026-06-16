@@ -1,1 +1,1 @@
-App made in Django to help my relatives in managing plants in the yard, used for data management.
+App made in Django to help my relatives in keeping track of plants in the yard, used for data management.
